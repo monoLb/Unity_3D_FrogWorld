@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class GridData
 {
-    private Dictionary<Vector3Int, placementData> placeObjectDict = new();
+    private Dictionary<Vector3Int, placementData> placedObjectDict = new();
 
     public void AddObjectAt(Vector3Int gridPos, Vector2Int gridSize,int id,int objIndex)
     {
@@ -12,9 +12,9 @@ public class GridData
         placementData data=new placementData(occupiedList,id,objIndex);
         foreach (var pos in occupiedList)
         {
-            if(placeObjectDict.ContainsKey(pos))
+            if(placedObjectDict.ContainsKey(pos))
                 throw new Exception("Object already occupied");
-            placeObjectDict[pos] = data;
+            placedObjectDict[pos] = data;
         }
     }
 
@@ -36,7 +36,7 @@ public class GridData
         List<Vector3Int> checkList = CalculateOccupy(gridPos, gridSize);
         foreach (var pos in checkList)
         {
-            if (placeObjectDict.ContainsKey(pos))
+            if (placedObjectDict.ContainsKey(pos))
                 return false;
         }
         return true;
