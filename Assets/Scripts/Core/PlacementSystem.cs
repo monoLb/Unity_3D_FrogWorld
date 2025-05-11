@@ -30,20 +30,24 @@ public class PlacementSystem : MonoBehaviour
     [SerializeField] private Transform _placementTransParent;
 
     //建造模式
-    public bool isPlacing = false;
-    
-    private GridData floorData,furnitureData;
-    private Renderer previewRenderer;
-    //创建的对象
-    private List<GameObject> placedGameObjectList = new();
+    public bool isPlacing;
 
+    //不同种类 创建不同的类方便管理
+    private GridData floorGrid,furnitureGrid;
+    //把创建的家具保存在列表里
+    private List<GameObject> objectList=new();
+    //能否建造则显示不同的指示器颜色
+    public Renderer _buildIndicatorRenderer;
+    //实时检测能否被创建
+    private bool buildValidity;
     private void Start()
     {
         
         StartPlacement();
-        floorData = new GridData();
-        furnitureData = new GridData();
-        previewRenderer = BuildIndicator.GetComponent<Renderer>();
+        floorGrid = new();
+        furnitureGrid = new();
+        //获取
+        _buildIndicatorRenderer= BuildIndicator.GetComponent<Renderer>();
     }
     
     private void Update()
@@ -54,12 +58,20 @@ public class PlacementSystem : MonoBehaviour
         {
             var gridPos = grid.WorldToCell(mousePos);
             int index = currentObjData.ID;
-            bool placementValidity = CheckPlacementValidity(gridPos, index);
-            previewRenderer.material.color = placementValidity ? Color.white : Color.red;
             
+            //实时监测能否被建造
+            buildValidity=CheckBuildValidity(gridPos, currentObjData.Size);
+            //改变颜色
+            _buildIndicatorRenderer.material.color = buildValidity ? Color.white : Color.red;
             BuildIndicator.transform.position = grid.CellToWorld(gridPos);
         }
 
+    }
+
+    private bool CheckBuildValidity(Vector3Int gridPos, Vector2Int gridSize)
+    {
+        GridData currentGrid = currentObjData.ID == 0 ? floorGrid: furnitureGrid;
+        return currentGrid.CheckIfOccupy(gridPos, gridSize);
     }
 
     public void SetCurrentObjectData(ObjectData data)
@@ -88,30 +100,29 @@ public class PlacementSystem : MonoBehaviour
 
         if (currentObjData != null)
         {
-            bool placementValidity=CheckPlacementValidity(gridPos, currentObjData.ID);
-
-            if (placementValidity == false)
+            
+            //如果无法被建造则返回
+            if (!buildValidity)
             {
                 AudioManager.Instance.PlaySound(falsePlaceAudio,Camera.main.transform.position,1);
                 return;
             }
+            
             if (currentObjData.prefab)
             {
-                GameObject newObj = Instantiate(currentObjData.prefab,_placementTransParent);
-                var objPos=grid.CellToWorld(gridPos); 
-                newObj.transform.position = objPos;
+                // var objPos=grid.CellToWorld(gridPos); 
+                //生成对象
+                GameObject newObj=Instantiate(currentObjData.prefab,_placementTransParent);
+                //修改位置
+                newObj.transform.position = gridPos;
+                //保存在表里
+                objectList.Add(newObj);
+                //根据是否为地板保存在不同的GridData中
+                GridData selectedObj=currentObjData.ID==0?floorGrid:furnitureGrid;
+                selectedObj.AddObjectAt(gridPos,currentObjData.Size,currentObjData.ID,objectList.Count-1);
                 
                 AudioManager.Instance.PlaySound(truePlaceAudio,Camera.main.transform.position,1);
                 
-                placedGameObjectList.Add(newObj);
-                //保存的地板类型和家具类型在不同的GridData数据中
-                GridData selectedData=currentObjData.ID==0?floorData:furnitureData;
-                
-                selectedData.AddObjectAt(
-                    gridPos,
-                    currentObjData.Size,
-                    currentObjData.ID,
-                    placedGameObjectList.Count-1);
             }
         }
         else
@@ -120,13 +131,7 @@ public class PlacementSystem : MonoBehaviour
         }
     
     }
-
-    private bool CheckPlacementValidity(Vector3Int gridPos, int id)
-    {
-        GridData selectedData=currentObjData.ID==0?floorData:furnitureData;
-
-        return selectedData.CanPlaceObjectAt(gridPos, currentObjData.Size);
-    }
+    
 
     private void StopPlacement()
     {

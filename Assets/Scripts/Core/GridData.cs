@@ -4,57 +4,55 @@ using UnityEngine;
 
 public class GridData
 {
-    private Dictionary<Vector3Int, PlacementData> placedObjectDict = new();
+    private Dictionary<Vector3Int, placementData> placeObjectDict = new();
 
-    public void AddObjectAt(Vector3Int GridPos, Vector2Int objSize, int id,int placeObjIndex)
+    public void AddObjectAt(Vector3Int gridPos, Vector2Int gridSize,int id,int objIndex)
     {
-        List<Vector3Int> positionToOccupy = CalculatePosition(GridPos, objSize);
-        PlacementData data=new PlacementData(positionToOccupy,id,placeObjIndex);
-        foreach (var pos in positionToOccupy)
+        List<Vector3Int> occupiedList = CalculateOccupy(gridPos, gridSize);
+        placementData data=new placementData(occupiedList,id,objIndex);
+        foreach (var pos in occupiedList)
         {
-            if (placedObjectDict.ContainsKey(pos))
-                throw new Exception($"Dictionary already contains this cell position {pos}");
-            placedObjectDict[pos]=data;
+            if(placeObjectDict.ContainsKey(pos))
+                throw new Exception("Object already occupied");
+            placeObjectDict[pos] = data;
         }
     }
 
-    private List<Vector3Int> CalculatePosition(Vector3Int gridPos, Vector2Int objSize)
+    private List<Vector3Int> CalculateOccupy(Vector3Int gridPos, Vector2Int gridSize)
     {
-        List<Vector3Int> returnValue = new();
-        for (int x = 0; x < objSize.x; x++)
+        List<Vector3Int> calculateList = new ();
+        for (int x = 0; x < gridSize.x; x++)
         {
-            for (int y = 0; y < objSize.y; y++)
+            for (int y = 0; y < gridSize.y; y++)
             {
-                returnValue.Add(gridPos+new Vector3Int(x,0,y));
+                calculateList.Add(gridPos + new Vector3Int(x, 0, y));
             }
         }
-        return returnValue;
+        return calculateList;
     }
 
-    public bool CanPlaceObjectAt(Vector3Int gridPos, Vector2Int objSize)
+    public bool CheckIfOccupy(Vector3Int gridPos, Vector2Int gridSize)
     {
-        List<Vector3Int> positionToOccupy = CalculatePosition(gridPos, objSize);
-        foreach (var pos in positionToOccupy)
+        List<Vector3Int> checkList = CalculateOccupy(gridPos, gridSize);
+        foreach (var pos in checkList)
         {
-            if (placedObjectDict.ContainsKey(pos))
+            if (placeObjectDict.ContainsKey(pos))
                 return false;
         }
         return true;
     }
-    
 }
 
-public class PlacementData
+public class placementData
 {
-    public List<Vector3Int> occupiedCells = new();
+    public List<Vector3Int> gridOne2AllList = new();
     public int ID { get;private set; }
-    //记录创建的家具的编号，删除时方便。
-    public int PlaceObjectIndex { get;private set; }
+    public int gridIndex { get; private set; }
 
-    public PlacementData(List<Vector3Int> occ, int id, int placeObjectIndex)
+    public placementData(List<Vector3Int> list, int id, int gridIndex)
     {
-        this.occupiedCells = occ;
+        this.gridOne2AllList = list;
         this.ID = id;
-        this.PlaceObjectIndex = placeObjectIndex;
+        this.gridIndex = gridIndex;
     }
 }
