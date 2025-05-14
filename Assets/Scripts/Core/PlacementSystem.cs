@@ -9,8 +9,8 @@ public class PlacementSystem : MonoBehaviour
     [SerializeField]
     private GameObject mouseIndicator;
 
-    [FormerlySerializedAs("cellIndicator")] [FormerlySerializedAs("buildIndicator")] [SerializeField]
-    private GameObject BuildIndicator;
+    // [SerializeField]
+    // private GameObject BuildIndicator;
     
     [SerializeField]
     private InputManager inputManager;
@@ -33,21 +33,31 @@ public class PlacementSystem : MonoBehaviour
     public bool isPlacing;
 
     //不同种类 创建不同的类方便管理
-    private GridData floorGrid,furnitureGrid;
+    [field: SerializeField]
+    public GridData floorGrid,furnitureGrid;
     //把创建的家具保存在列表里
     private List<GameObject> objectList=new();
     //能否建造则显示不同的指示器颜色
-    public Renderer _buildIndicatorRenderer;
+    // public Renderer _buildIndicatorRenderer;
+    //在其他脚本中调用
+    [SerializeField]
+    private PreviewSystem previewSystem;
+    
     //实时检测能否被创建
     private bool buildValidity;
+    
+    //优化
+    private Vector3Int lastPosition;
+    
     private void Start()
     {
         
         StartPlacement();
         floorGrid = new();
         furnitureGrid = new();
-        //获取
-        _buildIndicatorRenderer= BuildIndicator.GetComponent<Renderer>();
+        //获取Renderer组件
+        // _buildIndicatorRenderer= BuildIndicator.GetComponent<Renderer>();
+
     }
     
     private void Update()
@@ -57,13 +67,15 @@ public class PlacementSystem : MonoBehaviour
         if(isPlacing)
         {
             var gridPos = grid.WorldToCell(mousePos);
-            int index = currentObjData.ID;
+
+            if (lastPosition != gridPos)
+            {
+                //实时监测能否被建造
+                buildValidity=CheckBuildValidity(gridPos, currentObjData.Size);
+                //改变颜色,位置
+                previewSystem.UpdatePosition(gridPos,buildValidity);
+            }
             
-            //实时监测能否被建造
-            buildValidity=CheckBuildValidity(gridPos, currentObjData.Size);
-            //改变颜色
-            _buildIndicatorRenderer.material.color = buildValidity ? Color.white : Color.red;
-            BuildIndicator.transform.position = grid.CellToWorld(gridPos);
         }
 
     }
@@ -78,12 +90,15 @@ public class PlacementSystem : MonoBehaviour
     {
         currentObjData = data;
         mouseIndicator.SetActive(true);
-        BuildIndicator.SetActive(true);
+        previewSystem.StopShowingPlacementPreview();
+        lastPosition = Vector3Int.zero;
+        previewSystem.StartShowingPlacementPreview(data.prefab,data.Size);
     }
+    
     public void StartPlacement()
     {
         mouseIndicator.SetActive(false);
-        BuildIndicator.SetActive(false);
+        // BuildIndicator.SetActive(false);
         inputManager.OnClicked += PlaceStucture;
         inputManager.OnEsc += StopPlacement;
     }
@@ -98,6 +113,8 @@ public class PlacementSystem : MonoBehaviour
         Vector3 mousePos = inputManager.GetSelectedMapPosition();
         Vector3Int gridPos=grid.WorldToCell(mousePos);
 
+        if(lastPosition == gridPos)
+            return;
         if (currentObjData != null)
         {
             
@@ -120,8 +137,9 @@ public class PlacementSystem : MonoBehaviour
                 //根据是否为地板保存在不同的GridData中
                 GridData selectedObj=currentObjData.ID==0?floorGrid:furnitureGrid;
                 selectedObj.AddObjectAt(gridPos,currentObjData.Size,currentObjData.ID,objectList.Count-1);
-                
+                Debug.Log("ss");
                 AudioManager.Instance.PlaySound(truePlaceAudio,Camera.main.transform.position,1);
+                lastPosition=gridPos;
                 
             }
         }
@@ -138,7 +156,9 @@ public class PlacementSystem : MonoBehaviour
         isPlacing = false;
         currentObjData = null;
         Debug.Log("Stop placement");
-        BuildIndicator.SetActive(false);
+        previewSystem.StopShowingPlacementPreview();
+        inputManager.OnClicked -= PlaceStucture;
+        inputManager.OnEsc -= StopPlacement;
     }
 
     

@@ -2,9 +2,10 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
 public class GridData
 {
-    private Dictionary<Vector3Int, placementData> placedObjectDict = new();
+    [SerializeField]private Dictionary<Vector3Int, placementData> placedObjectDict = new();
 
     public void AddObjectAt(Vector3Int gridPos, Vector2Int gridSize,int id,int objIndex)
     {
