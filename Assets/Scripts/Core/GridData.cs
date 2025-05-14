@@ -5,7 +5,7 @@ using UnityEngine;
 [System.Serializable]
 public class GridData
 {
-    [SerializeField]private Dictionary<Vector3Int, placementData> placedObjectDict = new();
+    private Dictionary<Vector3Int, placementData> placedObjectDict = new();
 
     public void AddObjectAt(Vector3Int gridPos, Vector2Int gridSize,int id,int objIndex)
     {

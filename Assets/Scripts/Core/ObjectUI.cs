@@ -32,7 +32,6 @@ public class ObjectUI : MonoBehaviour,IPointerDownHandler
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        placementSystem.isPlacing = true;
         placementSystem.SetCurrentObjectData(objectData);
     }
 }

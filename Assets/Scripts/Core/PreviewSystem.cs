@@ -14,6 +14,7 @@ public class PreviewSystem : MonoBehaviour
     
     //指示器的shader
     private Renderer buildIndicatorRenderer;
+    
     void Start()
     {
         previewMaterialsInstance =new Material(previewMaterialPrefab);
