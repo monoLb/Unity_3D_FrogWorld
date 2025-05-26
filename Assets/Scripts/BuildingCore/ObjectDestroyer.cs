@@ -32,7 +32,6 @@ public class ObjectDestroyer : MonoBehaviour
     public void QuiteRemovingState()
     {
         if(shovelAnimator != null) 
-            Destroy(shovel);    
-        Debug.Log("QuiteRemovingState");
+            Destroy(shovel);   
     }
 }

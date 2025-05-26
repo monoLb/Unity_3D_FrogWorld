@@ -7,7 +7,7 @@ public class InputManager : MonoBehaviour
 {
     [SerializeField]
     private Camera _screenCamera;
-    [FormerlySerializedAs("_groundLayerMask")] [SerializeField]
+    [SerializeField]
     private LayerMask groundLayerMask;
 
     [SerializeField] 

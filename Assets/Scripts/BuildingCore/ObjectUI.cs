@@ -29,6 +29,7 @@ public class ObjectUI : MonoBehaviour,IPointerDownHandler
         objectImage.sprite = objectData.sprite;
         objectImage.SetNativeSize();
     }
+    
 
     public void OnPointerDown(PointerEventData eventData)
     {
