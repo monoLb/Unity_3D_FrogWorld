@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
 
-public class InputManagement : MonoBehaviour
+public class InputSystem : MonoBehaviour
 {
     [SerializeField]
     private Camera _screenCamera;

@@ -5,7 +5,7 @@ using UnityEngine.Serialization;
 
 public class PlaceSystem : MonoBehaviour
 {
-    public InputManagement inputManagement;
+    [FormerlySerializedAs("inputManagement")] public InputSystem inputSystem;
     public Grid grid;
     
     public GridData gridData;
@@ -29,7 +29,7 @@ public class PlaceSystem : MonoBehaviour
      
         if(constructState == null)
             return;
-        var mousePos = inputManagement.GetSelectedMapPosition();
+        var mousePos = inputSystem.GetSelectedMapPosition();
         var gridPos = grid.WorldToCell(mousePos);
 
         if (constructState != null)
@@ -94,28 +94,28 @@ public class PlaceSystem : MonoBehaviour
     
     private void BindInputActions()
     {
-        inputManagement.OnClicked -= PlaceStucture;
-        inputManagement.OnEsc -= StopPlacement;
-        inputManagement.OnClicked += PlaceStucture;
-        inputManagement.OnEsc += StopPlacement;
+        inputSystem.OnClicked -= PlaceStucture;
+        inputSystem.OnEsc -= StopPlacement;
+        inputSystem.OnClicked += PlaceStucture;
+        inputSystem.OnEsc += StopPlacement;
     }
 
     private void UnbindInputActions()
     {
-        inputManagement.OnClicked -= PlaceStucture;
-        inputManagement.OnEsc -= StopPlacement;
+        inputSystem.OnClicked -= PlaceStucture;
+        inputSystem.OnEsc -= StopPlacement;
     }  
     
     private void PlaceStucture()
     {
         if(constructState==null)
             return;
-        if (inputManagement.IsPointerOverUI())
+        if (inputSystem.IsPointerOverUI())
         {
             return;
         }
 
-        Vector3 mousePos = inputManagement.GetSelectedMapPosition();
+        Vector3 mousePos = inputSystem.GetSelectedMapPosition();
         Vector3Int gridPos=grid.WorldToCell(mousePos);
         
         

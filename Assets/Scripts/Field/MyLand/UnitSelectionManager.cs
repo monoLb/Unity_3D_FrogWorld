@@ -17,7 +17,7 @@ public class UnitSelectionManager : MonoBehaviour
     public LayerMask groundMask;
     public GameObject flag;
     
-    public InputManagement inputManagement;
+    [FormerlySerializedAs("inputManagement")] public InputSystem inputSystem;
     public PlaceSystem placeSystem;
     
     private GameObject activeIndicaor;
@@ -46,14 +46,15 @@ public class UnitSelectionManager : MonoBehaviour
     private void Start()
     {
         UpdateUnitCamera();
-        inputManagement.OnEsc += StopBuild;
+        inputSystem.OnEsc += StopBuild;
     }
 
     private void StopBuild()
     {
         isBuilding = false;
-        player.SetBuildingUIInactive();
-        inputManagement.gameObject.SetActive(false);
+        if(player != null)
+            player.SetBuildingUIInactive();
+        inputSystem.gameObject.SetActive(false);
         placeSystem.gameObject.SetActive(false);
         placeSystem.QuitBuildingState();
     }
@@ -73,7 +74,7 @@ public class UnitSelectionManager : MonoBehaviour
                     SelectByClicking(hitInfo.collider.gameObject);
 
                 }
-                else if (!inputManagement.IsPointerOverUI())
+                else if (!inputSystem.IsPointerOverUI())
                 {
                     DeselectAll();
                 }
@@ -127,7 +128,7 @@ public class UnitSelectionManager : MonoBehaviour
         {
             player.SetBuildingUIActive();
             isBuilding = true;
-            inputManagement.gameObject.SetActive(true);
+            inputSystem.gameObject.SetActive(true);
             placeSystem.gameObject.SetActive(true);
         }
 
